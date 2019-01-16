@@ -199,13 +199,14 @@ public class BarcelonaPlayer extends Thread {
 					
 				} else if (selfPerception.getPosition().getX() <=  30.0d) {
 					PlayerPerception j = getCloserPlayer();
-					if(selfPerception.getPosition().getX() > j.getPosition().getX()) { // verify if closer player is in front
+					if(selfPerception.getPosition().getX() < j.getPosition().getX()) { // verify if closer player is in front
 						turnTo(golPosition);
 						tick();
 						commander.doKick(45.0d, 0d);
 					}else { // toca bola
 						double mag = j.getPosition().sub(selfPerception.getPosition()).magnitude();
-						commander.doTurnToPointBlocking(j.getPosition());					
+						Vector2D frontPosition = new Vector2D(j.getPosition().getX() + 15.0, j.getPosition().getY());
+						commander.doTurnToPointBlocking(frontPosition);					
 						commander.doKickBlocking(mag*KICK_FACTOR, 0d);
 						try {
 							Thread.sleep(1000);
@@ -240,7 +241,7 @@ public class BarcelonaPlayer extends Thread {
 			}
 
 		} else {
-			if (isAlignedTo(ballPosition)) {
+			if (isAlignedTo(ballPosition) && selfPerception.getPosition().getX() < fieldPerception.getBall().getPosition().getX()) {
 				_printf("ATK: Running to the ball...");
 				commander.doDashBlocking(100.0d);
 			} else {
@@ -279,10 +280,10 @@ public class BarcelonaPlayer extends Thread {
 	}
 	
 	private void statePassingBall() {
-		if (!isCloserToBall()) {
-			state = State.RETURN_TO_HOME;
-			return;
-		}
+//		if (!isCloserToBall()) {
+//			state = State.RETURN_TO_HOME;
+//			return;
+//		}
 
 		Vector2D golPosition;
 		Vector2D ballPosition = fieldPerception.getBall().getPosition();
@@ -607,7 +608,7 @@ public class BarcelonaPlayer extends Thread {
 		Vector2D initPos = new Vector2D(xInit * side.value(), yInit * side.value());
 		Vector2D ballPos;
 		playerDeafaultPosition = new Vector2D(xInit, yInit);
-		Rectangle area = side == EFieldSide.LEFT ? new Rectangle(-52, -20, 16, 40) : new Rectangle(36, -20, 16, 40);
+		Rectangle area = side == EFieldSide.LEFT ? new Rectangle(-62, -30, 26, 50) : new Rectangle(46, -30, 26, 50);
 		while (true) {
 			updatePerceptions();
 			ballPos = fieldPerception.getBall().getPosition();
@@ -616,11 +617,11 @@ public class BarcelonaPlayer extends Thread {
 				commander.doMoveBlocking(xInit, yInit);								
 				break;
 			case PLAY_ON:
-				ballX = fieldPerception.getBall().getPosition().getX();
+				ballX = fieldPerception.getBall().getPosition().getX() - (EFieldSide.LEFT.value() * 10);
 				ballY = fieldPerception.getBall().getPosition().getY();
 				if (arrivedAtBall()) { // chutar
 					//commander.doKickBlocking(100.0d, 0.0d);
-					turnTo(ballPos);
+					turnTo(new Vector2D(0, 0));
 					commander.doCatchBlocking(0);
 					commander.doKickBlocking(100d, 0);
 				} else if (area.contains(ballX, ballY)) { // defender
