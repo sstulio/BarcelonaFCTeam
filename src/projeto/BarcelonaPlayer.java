@@ -167,21 +167,15 @@ public class BarcelonaPlayer extends Thread {
 
 	
 	private void stateAttacking() {
+		
 		if (!isCloserToBall()) {
-			
-			//Prevent zagueiros from leaving position and run towards the ball
-			
-			if(selfPerception.getUniformNumber() != 2) {
-				state = State.FOLLOW;
-				return;
-			}else {
-				state = State.RETURN_TO_HOME;
-				return;
-			}			
+			state = State.FOLLOW;
+			return;		
 		}
 
 		Vector2D golPosition;
 		Vector2D ballPosition = fieldPerception.getBall().getPosition();
+//		ballPosition = new Vector2D(ballPosition.getX() - (selfPerception.getSide().value() * 2), ballPosition.getY());
 
 		if (arrivedAtBall()) {
 			golPosition = new Vector2D(50 * selfPerception.getSide().value(), 0);
@@ -617,12 +611,12 @@ public class BarcelonaPlayer extends Thread {
 				commander.doMoveBlocking(xInit, yInit);								
 				break;
 			case PLAY_ON:
-				ballX = fieldPerception.getBall().getPosition().getX() - (EFieldSide.LEFT.value() * 10);
+				ballX = fieldPerception.getBall().getPosition().getX() - (selfPerception.getSide().value() * 10);
 				ballY = fieldPerception.getBall().getPosition().getY();
 				if (arrivedAtBall()) { // chutar
 					//commander.doKickBlocking(100.0d, 0.0d);
 					turnTo(new Vector2D(0, 0));
-					commander.doCatchBlocking(0);
+					commander.doCatchBlocking(20);
 					commander.doKickBlocking(100d, 0);
 				} else if (area.contains(ballX, ballY)) { // defender
 					dashBall(ballPos);
